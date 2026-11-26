@@ -284,6 +284,8 @@
   "code_block_copied_code_block": "Bloque de código copiado",
   "code_block_copy_code": "Copiar código",
   "code_block_copied": "¡Copiado!",
+  "escape_instruction_label": "Instrucción de escape",
+  "developer_instruction_label": "Instrucción del desarrollador",
   "message_content_role_assistant": "Asistente",
   "message_content_role_agent": "Agente",
   "message_content_role_teammate": "Compañero de equipo",
@@ -387,6 +389,7 @@
       }
     }
   ],
+  "reasoning_summary_label": "Resumen del razonamiento",
   "thinking_block_label": "Razonamiento",
   "compact_boundary_title": "Ventana de contexto compactada en este punto",
   "compact_boundary_label": "Contexto compactado",

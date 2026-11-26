@@ -276,6 +276,8 @@
   "code_block_copied_code_block": "코드 블록이 복사되었습니다",
   "code_block_copy_code": "코드 복사",
   "code_block_copied": "복사됨!",
+  "escape_instruction_label": "탈출 지시",
+  "developer_instruction_label": "개발자 지시",
   "message_content_role_assistant": "어시스턴트",
   "message_content_role_agent": "에이전트",
   "message_content_role_teammate": "팀원",
@@ -373,6 +375,7 @@
       }
     }
   ],
+  "reasoning_summary_label": "추론 요약",
   "thinking_block_label": "사고",
   "compact_boundary_title": "이 지점에서 컨텍스트 창이 컴팩션되었습니다",
   "compact_boundary_label": "컨텍스트 컴팩션됨",

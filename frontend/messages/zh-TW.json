@@ -276,6 +276,8 @@
   "code_block_copied_code_block": "程式碼區塊已複製",
   "code_block_copy_code": "複製程式碼",
   "code_block_copied": "已複製！",
+  "escape_instruction_label": "逃逸指令",
+  "developer_instruction_label": "開發者指令",
   "message_content_role_assistant": "助手",
   "message_content_role_agent": "Agent",
   "message_content_role_teammate": "隊友",
@@ -373,6 +375,7 @@
       }
     }
   ],
+  "reasoning_summary_label": "推理摘要",
   "thinking_block_label": "思考",
   "compact_boundary_title": "上下文窗口在此處被壓縮",
   "compact_boundary_label": "上下文已壓縮",

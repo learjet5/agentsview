@@ -9,9 +9,10 @@
   interface Props {
     content: string;
     searchKey?: string;
+    reasoningSummary?: boolean;
   }
 
-  let { content, searchKey }: Props = $props();
+  let { content, searchKey, reasoningSummary = false }: Props = $props();
   let userCollapsed = $state(true);
   let overrideSeq = $state(-1);
   let collapsed = $derived(searchCollapsed(
@@ -20,7 +21,7 @@
   ));
 </script>
 
-<div class="thinking-block">
+<div class="thinking-block" class:reasoning-summary={reasoningSummary}>
   <button
     class="thinking-header"
     aria-expanded={!collapsed}
@@ -32,7 +33,7 @@
     <span class="thinking-chevron" class:open={!collapsed}>
       <ChevronRightIcon size="10" strokeWidth="2.4" aria-hidden="true" />
     </span>
-    <span class="thinking-label">{m.thinking_block_label()}</span>
+    <span class="thinking-label">{reasoningSummary ? m.reasoning_summary_label() : m.thinking_block_label()}</span>
     <SearchMatchCount {searchKey} />
   </button>
   {#if !collapsed}
@@ -49,6 +50,15 @@
     background: var(--thinking-bg);
     border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
     margin: 0;
+  }
+
+  .thinking-block.reasoning-summary {
+    border-left-color: var(--accent-teal);
+    background: var(--reasoning-summary-bg);
+  }
+
+  .reasoning-summary .thinking-header {
+    color: var(--accent-teal);
   }
 
   .thinking-header {

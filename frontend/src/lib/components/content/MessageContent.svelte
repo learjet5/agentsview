@@ -51,6 +51,9 @@ import type { DbMessage as Message } from "../../api/generated/index.js";
   let activeSearchOrdinal = $derived(isSubagentContext ? undefined : searchOrdinal);
   let hasSearchQuery = $derived(activeSearchOrdinal !== undefined && inSessionSearch.isActive);
   let isUser = $derived(message.role === "user");
+  let isReasoningSummary = $derived(message.source_type === "reasoning" && message.source_subtype === "reasoning_summary");
+  let isEscapeInstruction = $derived(message.source_type === "developer" && message.source_subtype === "escape_instruction");
+  let isDeveloperInstruction = $derived(message.source_type === "developer" && (message.source_subtype === "instruction" || isEscapeInstruction));
   let mainModel = $derived(!isSubagentContext && messagesStore.sessionId === message.session_id
     ? messagesStore.mainModel : "");
   let offMainModel = $derived.by((): string => {
@@ -62,6 +65,7 @@ import type { DbMessage as Message } from "../../api/generated/index.js";
   let tokenSummary = $derived(formatTokenUsage(message.context_tokens, hasContextTokens, message.output_tokens, hasOutputTokens));
   let owningSession = $derived(session !== undefined ? session
     : sessions.sessions.find((s) => s.id === message.session_id) ?? sessions.activeSession);
+  let isCodexUser = $derived(isUser && owningSession?.agent === "codex");
 
   const INLINE_TEAMMATE_MESSAGE_RE =
     /<teammate-message\b[^>]*\bteammate_id\s*=\s*(?:"[^"]+"|'[^']+'|[^\s>]+)[^>]*>[\s\S]*?<\/teammate-message\s*>/;
@@ -77,13 +81,19 @@ import type { DbMessage as Message } from "../../api/generated/index.js";
     return "user";
   });
   let roleLabel = $derived.by(() => {
+    if (isReasoningSummary) return m.reasoning_summary_label();
+    if (isDeveloperInstruction) return m.developer_instruction_label();
     if (!isUser) return m.message_content_role_assistant();
+    if (isCodexUser) return m.message_content_role_user();
     if (isSubagentContext || sessionKind === "subagent") return m.message_content_role_agent();
     if (sessionKind === "teammate" || hasInlineTeammateMessage) return m.message_content_role_teammate();
     return m.message_content_role_user();
   });
   let roleIcon = $derived.by(() => {
+    if (isReasoningSummary) return "R";
+    if (isDeveloperInstruction) return "D";
     if (!isUser) return "A";
+    if (isCodexUser) return "U";
     if (isSubagentContext || sessionKind === "subagent") return "S";
     if (sessionKind === "teammate" || hasInlineTeammateMessage) return "T";
     return "U";
@@ -113,9 +123,11 @@ import type { DbMessage as Message } from "../../api/generated/index.js";
   }
 
   let showText = $derived(ui.isBlockVisible(isUser ? "user" : "assistant"));
-  let accentColor = $derived(isUser ? "var(--accent-blue)" : "var(--accent-purple)");
-  let accentForeground = $derived(isUser ? "var(--accent-blue-foreground)" : "var(--accent-purple-foreground)");
-  let roleBg = $derived(isUser ? "var(--user-bg)" : "var(--assistant-bg)");
+  let accentColor = $derived(isReasoningSummary ? "var(--accent-teal)" : isDeveloperInstruction ? "var(--accent-amber)" : isUser ? "var(--accent-blue)" : "var(--accent-purple)");
+  let accentForeground = $derived(isReasoningSummary ? "var(--accent-teal-foreground)" : isDeveloperInstruction ? "var(--accent-amber-foreground)" : isUser ? "var(--accent-blue-foreground)" : "var(--accent-purple-foreground)");
+  let roleBg = $derived(isReasoningSummary ? "var(--reasoning-summary-bg)" : isEscapeInstruction ? "var(--escape-instruction-bg)" : isDeveloperInstruction ? "var(--tool-bg)" : isUser ? "var(--user-bg)" : "var(--assistant-bg)");
+  // An escape instruction keeps its role header; only the block is purple.
+  let borderColor = $derived(isEscapeInstruction ? "var(--escape-instruction-accent)" : accentColor);
   let pinned = $derived(pins.isPinned(message.id));
   let pinFeedback = $state("");
   let pinFailed = $state(false);
@@ -219,10 +231,14 @@ import type { DbMessage as Message } from "../../api/generated/index.js";
   }
 </script>
 
-<div class="message" class:is-user={isUser} class:compact style:border-left-color={accentColor} style:background={roleBg}>
+<div class="message" class:is-user={isUser} class:compact style:border-left-color={borderColor} style:background={roleBg}>
   <div class="message-header">
     <span class="role-icon" style:background={accentColor} style:color={accentForeground}>{roleIcon}</span>
     <span class="role-label" style:color={accentColor}>{roleLabel}</span>
+    {#if isEscapeInstruction}
+      <span class="escape-badge">{m.escape_instruction_label()}</span>
+    {/if}
+    <span class="message-ordinal" data-message-ordinal={message.ordinal}>#{message.ordinal}</span>
     <CopyButton revealOnHover {copied} ariaLabel={m.message_content_copy_message()}
       copiedAriaLabel={m.message_content_copied_message()} title={m.message_content_copy_message()}
       copiedTitle={m.message_content_copied()} onclick={handleCopy} />
@@ -253,7 +269,7 @@ import type { DbMessage as Message } from "../../api/generated/index.js";
         ? undefined : blockKey(activeSearchOrdinal, segment.type, segmentIndex)}
       {#if segment.type === "thinking"}
         {#if ui.isBlockVisible("thinking")}
-          <ThinkingBlock content={segment.content} {searchKey} />
+          <ThinkingBlock content={segment.content} {searchKey} reasoningSummary={isReasoningSummary} />
         {/if}
       {:else if segment.type === "tool"}
         <!-- Structured and legacy tool calls are rendered after prose. -->
@@ -344,6 +360,11 @@ import type { DbMessage as Message } from "../../api/generated/index.js";
     justify-content: center; font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; line-height: 1;
   }
   .role-label { font-size: 13px; font-weight: 600; letter-spacing: 0.01em; }
+  .escape-badge {
+    font-size: 11px; font-weight: 600; line-height: 1; padding: 3px 7px; border-radius: 999px;
+    background: var(--escape-instruction-accent); color: #ffffff; white-space: nowrap;
+  }
+  .message-ordinal { color: var(--text-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
   .timestamp { font-size: 12px; color: var(--text-muted); }
   .header-meta { margin-left: auto; display: flex; align-items: center; gap: 8px; min-width: 0; }
   .message-tokens { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); white-space: nowrap; }

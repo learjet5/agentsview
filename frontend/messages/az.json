@@ -284,6 +284,8 @@
   "code_block_copied_code_block": "Kod bloku kopyalandı",
   "code_block_copy_code": "Kodu kopyala",
   "code_block_copied": "Kopyalandı!",
+  "escape_instruction_label": "Escape instruction",
+  "developer_instruction_label": "Tərtibatçı təlimatı",
   "message_content_role_assistant": "Köməkçi",
   "message_content_role_agent": "Agent",
   "message_content_role_teammate": "Komanda yoldaşı",
@@ -387,6 +389,7 @@
       }
     }
   ],
+  "reasoning_summary_label": "Düşünmə xülasəsi",
   "thinking_block_label": "Düşünmə",
   "compact_boundary_title": "Bu nöqtədə kontekst pəncərəsi sıxlaşdırılıb",
   "compact_boundary_label": "Kontekst sıxlaşdırılıb",

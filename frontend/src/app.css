@@ -100,6 +100,9 @@
   --user-bg: #eef2ff; /* kit-ui-check-ignore: app token definition */
   --assistant-bg: #faf9ff; /* kit-ui-check-ignore: app token definition */
   --thinking-bg: #f5f3ff; /* kit-ui-check-ignore: app token definition */
+  --reasoning-summary-bg: #e9f7f4; /* kit-ui-check-ignore: app token definition */
+  --escape-instruction-bg: #efe2ff; /* kit-ui-check-ignore: app token definition */
+  --escape-instruction-accent: #7c3aed; /* kit-ui-check-ignore: app token definition */
   --tool-bg: #fffbf0; /* kit-ui-check-ignore: app token definition */
   --code-bg: #1e1e2e; /* kit-ui-check-ignore: app token definition */
   --code-text: #cdd6f4; /* kit-ui-check-ignore: app token definition */
@@ -147,6 +150,9 @@
   --user-bg: #111827; /* kit-ui-check-ignore: app token definition */
   --assistant-bg: #141220; /* kit-ui-check-ignore: app token definition */
   --thinking-bg: #1a1530; /* kit-ui-check-ignore: app token definition */
+  --reasoning-summary-bg: #102b29; /* kit-ui-check-ignore: app token definition */
+  --escape-instruction-bg: #2a1747; /* kit-ui-check-ignore: app token definition */
+  --escape-instruction-accent: #a78bfa; /* kit-ui-check-ignore: app token definition */
   --tool-bg: #1a1508; /* kit-ui-check-ignore: app token definition */
   --code-bg: #0d0d14; /* kit-ui-check-ignore: app token definition */
   --code-text: #cdd6f4; /* kit-ui-check-ignore: app token definition */

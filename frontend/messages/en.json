@@ -282,6 +282,8 @@
   "code_block_copied_code_block": "Copied code block",
   "code_block_copy_code": "Copy code",
   "code_block_copied": "Copied!",
+  "escape_instruction_label": "Escape instruction",
+  "developer_instruction_label": "Developer instruction",
   "message_content_role_assistant": "Assistant",
   "message_content_role_agent": "Agent",
   "message_content_role_teammate": "Teammate",
@@ -385,6 +387,7 @@
       }
     }
   ],
+  "reasoning_summary_label": "Reasoning summary",
   "thinking_block_label": "Thinking",
   "compact_boundary_title": "Context window compacted at this point",
   "compact_boundary_label": "Context compacted",

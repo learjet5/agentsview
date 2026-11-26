@@ -139,6 +139,7 @@ describe("ToolCallGroup", () => {
     const divider = document.querySelector(".read-progress-divider");
     expect(divider?.textContent).toContain("New messages");
     expect(document.querySelector('[data-message-ordinal="2"]')).not.toBeNull();
+    expect(Array.from(document.querySelectorAll(".message-ordinal"), (node) => node.textContent)).toEqual(["#1", "#2"]);
 
     unmount(component);
   });

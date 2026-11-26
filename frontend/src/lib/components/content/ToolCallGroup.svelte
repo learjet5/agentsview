@@ -109,6 +109,7 @@
       {@const calls = message.tool_calls ?? []}
       {@const turn = turnByMessage.get(message.id)}
       <div data-message-ordinal={message.ordinal}>
+        <span class="message-ordinal">#{message.ordinal}</span>
         {#if ui.isBlockVisible("thinking")}
           {#each collectSearchBlocks(message).filter((block) => block.kind === "thinking") as block (block.key)}
             <ThinkingBlock content={block.text} searchKey={searchable ? block.key : undefined} />
@@ -163,6 +164,7 @@
   .group-timestamp { font-size: 12px; color: var(--text-muted); margin-left: auto; }
   .tool-group:hover :global(.kit-copy-btn) { opacity: 1; }
   .tool-group-body { display: flex; flex-direction: column; gap: 2px; }
+  .message-ordinal { display: inline-block; color: var(--text-muted); font-size: 11px; font-variant-numeric: tabular-nums; margin: 2px 0; }
   .read-progress-divider {
     display: flex;
     align-items: center;

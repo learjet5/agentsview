@@ -282,6 +282,8 @@
   "code_block_copied_code_block": "コピーされたコードブロック",
   "code_block_copy_code": "コードをコピーする",
   "code_block_copied": "コピーしました！",
+  "escape_instruction_label": "エスケープ指示",
+  "developer_instruction_label": "開発者指示",
   "message_content_role_assistant": "アシスタント",
   "message_content_role_agent": "エージェント",
   "message_content_role_teammate": "チームメイト",
@@ -385,6 +387,7 @@
       }
     }
   ],
+  "reasoning_summary_label": "推論の要約",
   "thinking_block_label": "考え",
   "compact_boundary_title": "この時点でコンテキスト ウィンドウが圧縮されました",
   "compact_boundary_label": "圧縮されたコンテキスト",

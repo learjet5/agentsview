@@ -305,6 +305,18 @@ describe("MessageContent", () => {
       expect(text(".role-icon")).toBe(icon);
     },
   );
+  it("shows the native user role for a parentless Codex worker", async () => {
+    state.sessions = [session({ agent: "codex", relationship_type: "subagent", parent_session_id: null })];
+    await render(message({ role: "user", content: "# Task Description" }));
+    expect(text(".role-label")).toBe("User");
+    expect(text(".role-icon")).toBe("U");
+  });
+
+  it("shows the stored session ordinal beside a message", async () => {
+    await render(message({ ordinal: 47 }));
+    expect(text(".message-ordinal")).toBe("#47");
+  });
+
   it.each([
     ["subagent", "continuation", "Agent"],
     ["subagent", "fork", "Agent"],
@@ -383,6 +395,33 @@ describe("MessageContent", () => {
     expect(text(".role-label")).toBe("助手");
     expect(text(".thinking-label")).toBe("思考");
     expect(document.body.textContent).toContain("Visible response.");
+  });
+  it("renders a Codex reasoning summary as its own teal block", async () => {
+    await render(message({
+      content: "[Thinking]\nInspect the file first.\n[/Thinking]",
+      thinking_text: "Inspect the file first.",
+      has_thinking: true,
+      source_type: "reasoning",
+      source_subtype: "reasoning_summary",
+    }));
+    expect(text(".role-label")).toBe("Reasoning summary");
+    expect(text(".thinking-label")).toBe("Reasoning summary");
+    expect(document.querySelector(".thinking-block.reasoning-summary")).not.toBeNull();
+    expect(document.querySelector(".role-label")?.getAttribute("style")).toContain("var(--accent-teal)");
+    expect(document.body.textContent).not.toContain("viewer compatibility copy");
+    await click(".thinking-header");
+    expect(text(".thinking-content")).toBe("Inspect the file first.");
+  });
+  it("labels a recorded developer instruction separately from assistant replies", async () => {
+    await render(message({
+      role: "system",
+      content: "Follow the task rules.",
+      source_type: "developer",
+      source_subtype: "instruction",
+    }));
+    expect(text(".role-label")).toBe("Developer instruction");
+    expect(document.querySelector(".role-label")?.getAttribute("style")).toContain("var(--accent-amber)");
+    expect(document.body.textContent).toContain("Follow the task rules.");
   });
   it("reports compact token totals", async () => {
     await render(

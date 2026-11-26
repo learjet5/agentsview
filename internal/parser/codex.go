@@ -422,6 +422,22 @@ func (b *codexSessionBuilder) processLine(ctx context.Context,
 			return false, nil
 		}
 		b.handleTokenUsageRecord(payload)
+	case "compacted":
+		// Context compaction: from here on the model sees only the
+		// replacement history (developer/user context plus this summary),
+		// not the earlier items. Show a boundary with the summary so a
+		// reader can tell where the model's memory was replaced.
+		summary := strings.TrimSpace(payload.Get("message").Str)
+		b.sink.AppendMessage(ParsedMessage{
+			Role:              RoleAssistant,
+			Content:           summary,
+			Timestamp:         ts,
+			IsSystem:          true,
+			ContentLength:     len(summary),
+			SourceType:        "system",
+			SourceSubtype:     "compact_boundary",
+			IsCompactBoundary: true,
+		})
 	}
 	return false, nil
 }
@@ -492,6 +508,9 @@ func (b *codexSessionBuilder) handleResponseItem(ctx context.Context,
 	payload gjson.Result, ts time.Time,
 ) {
 	switch payload.Get("type").Str {
+	case "reasoning":
+		b.handleReasoningSummary(payload, ts)
+		return
 	case "function_call", "custom_tool_call":
 		b.handleFunctionCall(payload, ts)
 		return
@@ -504,6 +523,23 @@ func (b *codexSessionBuilder) handleResponseItem(ctx context.Context,
 	}
 
 	role := payload.Get("role").Str
+	if role == "developer" {
+		content := extractCodexContent(payload)
+		if strings.TrimSpace(content) != "" {
+			// AET viewer copies mark escape instructions (injected mid-rollout or
+			// placed in the initial developer profile) with payload.aet_annotation.
+			subtype := "instruction"
+			if payload.Get("aet_annotation.kind").Str == "escape_instruction" {
+				subtype = "escape_instruction"
+			}
+			b.sink.AppendMessage(ParsedMessage{
+				Role: RoleSystem, Content: content, DialogueText: new(content),
+				Timestamp: ts, ContentLength: len(content),
+				SourceType: "developer", SourceSubtype: subtype,
+			})
+		}
+		return
+	}
 	if role != "user" && role != "assistant" {
 		return
 	}
@@ -553,6 +589,39 @@ func (b *codexSessionBuilder) handleResponseItem(ctx context.Context,
 		msg.ReasoningEffort = b.reasoningEffort
 	}
 	b.sink.AppendMessage(msg)
+}
+
+func (b *codexSessionBuilder) handleReasoningSummary(
+	payload gjson.Result, ts time.Time,
+) {
+	var parts []string
+	for _, item := range payload.Get("summary").Array() {
+		text := item.Get("text").Str
+		if item.Type == gjson.String {
+			text = item.Str
+		}
+		if text = strings.TrimSpace(text); text != "" {
+			parts = append(parts, text)
+		}
+	}
+	summary := strings.Join(parts, "\n\n")
+	if summary == "" {
+		return
+	}
+	content := "[Thinking]\n" + summary + "\n[/Thinking]"
+	b.sink.AppendMessage(ParsedMessage{
+		Role:            RoleAssistant,
+		Content:         content,
+		ThinkingText:    summary,
+		HasThinking:     true,
+		DialogueText:    new(""),
+		Timestamp:       ts,
+		ContentLength:   len(content),
+		Model:           b.model,
+		ReasoningEffort: b.reasoningEffort,
+		SourceType:      "reasoning",
+		SourceSubtype:   "reasoning_summary",
+	})
 }
 
 func (b *codexSessionBuilder) handleAgentMessage(
